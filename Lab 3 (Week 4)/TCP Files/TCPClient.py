@@ -1,48 +1,27 @@
-# Import the required libraries
 from socket import *
 
-# Address for the server
 serverName = '192.168.56.1'
-
-# Server's listening port
 serverPort = 12000
 
-# Create the socket object
-clientSocket = socket(AF_INET, SOCK_STREAM)
+while True:
+    # new connection per msg
+    clientSocket = socket(AF_INET, SOCK_STREAM)
+    clientSocket.connect((serverName, serverPort))
 
-# Connect to the server at the specified port
-clientSocket.connect((serverName,serverPort))
+    sentence = input('Input message (or type "quit" to exit): ')
+    
+    if sentence.lower() == 'quit':
+        print("Exiting chat.")
+        clientSocket.close()
+        break
 
-## Prompt user for input
-# For python 2.x use raw_input() to get user input
-#sentence = raw_input('Input lowercase sentence:')
+    clientSocket.send(sentence.encode())
 
-# For python 3.x use input() to get user input
-sentence = input('Input lowercase sentence:')
-
-## Send the message
-
-# For python 2.x use the following (no need to convert from unicode to byte string):
-#clientSocket.send(sentence)
-
-# For python 3.x use the following
-# (explicit conversion from unicode to byte string using .encode() method):
-clientSocket.send(sentence.encode())
-
-## Receive the reply
-
-# For python 2.x use the following (no need to convert from byte string to unicode):
-#modifiedSentence = clientSocket.recv(1024)
-
-# For python 3.x use the following
-# (explicit conversion from byte string to unicode using .encode() method):
-modifiedSentence = clientSocket.recv(1024).decode()
-
-# For python 2.x use the following syntax for displaying strings:
-#print ('From Server:', modifiedSentence)
-
-# For python 3.x use the following syntax for displaying strings:
-print('From Server:', modifiedSentence)
-
-# Close the socket
-clientSocket.close()
+    clientSocket.shutdown(SHUT_WR)
+    
+    # show chats
+    chatHistory = clientSocket.recv(4096).decode()
+    print('\nChat History')
+    print(chatHistory)
+    
+    clientSocket.close()
