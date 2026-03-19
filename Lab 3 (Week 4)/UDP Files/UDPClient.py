@@ -10,29 +10,27 @@ serverPort = 12000
 # Create the socket object
 clientSocket = socket(AF_INET, SOCK_DGRAM)
 
-## Prompt user for input
-# For python 2.x use raw_input() to get user input
-#message = raw_input('Input lowercase sentence:')
+# Prompt user for a message once
+message = input('Input lowercase sentence: ')
 
-# For python 3.x use input() to get user input
-message = input('Input lowercase sentence:')
+# Counter to track replies received
+repliesReceived = 0
 
-## Send the message
-# For python 2.x use the following (no need to convert from unicode to byte string):
-#clientSocket.sendto(message,(serverName, serverPort))
+# Send the same message 100 times
+for i in range(1, 101):
+    clientSocket.sendto(message.encode('utf-8'), (serverName, serverPort))
+    
+    try:
+        clientSocket.settimeout(1)
+        modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
+        print(f"Reply {i}: {modifiedMessage.decode('utf-8')}")
+        repliesReceived += 1
+    except timeout:
+        print(f"Message {i}: No reply received (lost)")
 
-# For python 3.x use the following
-# (explicit conversion from unicode to byte string using .encode() method):
-clientSocket.sendto(message.encode(),(serverName, serverPort))
+print(f"\n--- Summary ---")
+print(f"Messages sent: 100")
+print(f"Replies received: {repliesReceived}")
+print(f"Messages lost: {100 - repliesReceived}")
 
-## Receive the reply
-modifiedMessage, serverAddress = clientSocket.recvfrom(2048)
-
-# For python 2.x use the following syntax for displaying strings:
-#print (modifiedMessage)
-
-# For python 3.x use the following syntax for displaying strings:
-print('Reply from server:', modifiedMessage.decode())
-
-# Close the socket
-clientSocket.close() 
+clientSocket.close()
