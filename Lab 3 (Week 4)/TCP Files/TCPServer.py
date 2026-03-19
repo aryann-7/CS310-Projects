@@ -5,7 +5,6 @@ serverSocket = socket(AF_INET, SOCK_STREAM)
 serverSocket.bind(('', serverPort))
 serverSocket.listen(1)
 
-# store chat history
 chatHistory = ""
 
 print('The server is ready to receive messages')
@@ -16,12 +15,13 @@ while True:
         sentence = connectionSocket.recv(1024).decode()
         if not sentence:
             continue
-        
-        # add new msg to history
-        chatHistory += f"{addr} : {sentence}\n"
-        
-        # send full history back to client
-        connectionSocket.send(chatHistory.encode())
-        
+
+        if sentence == '__HISTORY__':
+            connectionSocket.send(chatHistory.encode())
+        else:
+            # add msg to history
+            chatHistory += f"{addr} : {sentence}\n"
+            connectionSocket.send("OK".encode())
+
     finally:
         connectionSocket.close()
